@@ -1,5 +1,5 @@
-export default function success() {
+export default function Success() {
   return (
-    <h1>Success!</h1>
+    <h1>Success</h1>
   )
 }

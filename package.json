@@ -1,5 +1,5 @@
 {
-  "name": "ignite-shop-aula",
+  "name": "04-ignite-shop",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,16 +10,17 @@
   },
   "dependencies": {
     "@stitches/react": "^1.2.8",
-    "@types/node": "20.5.0",
-    "@types/react": "18.2.20",
-    "@types/react-dom": "18.2.7",
-    "eslint": "8.47.0",
-    "eslint-config-next": "13.4.16",
-    "keen-slider": "^6.8.6",
-    "next": "13.4.16",
+    "keen-slider": "^6.7.0",
+    "next": "12.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "stripe": "^13.2.0",
-    "typescript": "5.1.6"
+    "stripe": "^10.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.13",
+    "@types/react": "^18.0.17",
+    "eslint": "8.22.0",
+    "eslint-config-next": "12.2.5",
+    "typescript": "^4.7.4"
   }
 }
