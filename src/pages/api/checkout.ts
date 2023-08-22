@@ -5,7 +5,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const priceId = "";
+  const { priceId } = req.body;
+
+  if (req.method !== "POST") {
+    return res.status(405).end("Method not allowed");
+  }
+
+  if (!priceId) {
+    return res.status(400).json({ error: "Price ID not provided" });
+  }
 
   const successUrl = `${process.env.NEXT_URL}/success`;
   const cancelUrl = `${process.env.NEXT_URL}/cancel`;
@@ -20,5 +28,9 @@ export default async function handler(
         quantity: 1,
       },
     ],
+  });
+
+  return res.status(201).json({
+    checkoutUrl: checkoutSession.url,
   });
 }
