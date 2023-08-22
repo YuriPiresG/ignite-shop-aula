@@ -1,46 +1,103 @@
-import { useRouter } from "next/router";
+import { GetStaticProps } from "next";
+
+import axios from "axios";
+import Image from "next/image";
+import Stripe from "stripe";
+import { stripe } from "../../lib/stripe";
 import {
   ImageContainer,
   ProductContainer,
   ProductDetails,
 } from "../../styles/pages/product";
-import { GetStaticProps } from "next";
-import { stripe } from "../../lib/stripe";
+import { useState } from "react";
 
-export default function Product() {
-  const { query } = useRouter();
+interface ProductProps {
+  product: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    price: string;
+    description: string;
+    defaultPriceId: string;
+  };
+}
 
+export default function Product({ product }: ProductProps) {
+  const [isCreatingCheckoutSessions, setIsCreatingCheckoutSessions] =
+    useState(false);
+
+  async function handleBuyProduct() {
+    try {
+      setIsCreatingCheckoutSessions(true);
+
+      const response = await axios.post("/api/checkout", {
+        priceId: product.defaultPriceId,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setIsCreatingCheckoutSessions(false);
+
+      alert("Falha ao redirecionar ao checkout!");
+    }
+  }
   return (
     <ProductContainer>
-      <ImageContainer></ImageContainer>
+      <ImageContainer>
+        <Image src={product.imageUrl} width={520} height={480} alt="" />
+      </ImageContainer>
 
       <ProductDetails>
-        <h1>Camiseta X</h1>
-        <span>R$ 79,90</span>
+        <h1>{product.name}</h1>
+        <span>{product.price}</span>
 
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Est dolorum
-          natus, perspiciatis laborum omnis dicta quod sapiente, nihil tenetur,
-          fuga eos quia ad a accusamus necessitatibus voluptas voluptates atque
-          doloribus?
-        </p>
-        <button>Compre agora</button>
+        <p>{product.description}</p>
+
+        <button
+          disabled={isCreatingCheckoutSessions}
+          onClick={handleBuyProduct}
+        >
+          Comprar agora
+        </button>
       </ProductDetails>
     </ProductContainer>
   );
 }
 
+export const getStaticPaths = async () => {
+  return {
+    paths: [{ params: { id: "" } }],
+    fallback: true,
+  };
+};
+
 export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
   params,
 }) => {
-  const productId = params?.id;
+  const productId = params.id;
 
   const product = await stripe.products.retrieve(productId, {
     expand: ["default_price"],
   });
 
+  const price = product.default_price as Stripe.Price;
+
   return {
-    props: {},
-    revalidate: 60 * 60 * 1, // 1 hour
+    props: {
+      product: {
+        id: product.id,
+        name: product.name,
+        imageUrl: product.images[0],
+        price: new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(price.unit_amount / 100),
+        description: product.description,
+        defaultPriceId: price.id,
+      },
+    },
+    revalidate: 60 * 60 * 1, // 1 hours
   };
 };
